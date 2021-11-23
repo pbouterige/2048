@@ -1,5 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
+#include <string.h>
+
 
 
 typedef struct Partie
@@ -38,11 +41,35 @@ void Affiche_Partie(Partie * p){
  
 }
 
+void sauvegarde_partie(Partie *p){
+    puts("Quel nom donnez-vous à votre sauvegarde?");
+    char * name = (char *) malloc( 40 );;
+    scanf("%s",name);
+    char * rep = (char *) malloc( 15 + strlen(name) );
 
+    strcat( rep, "sauvegarde/" );
+    strcat( rep, name );
+    strcat( rep, ".txt" );
+
+    FILE * f = fopen(rep,"w+");
+    
+    
+    char c = (char)p->score;
+    fprintf(f,"score : %d\n",p->score);
+    fprintf(f,"nombre de coups : %d\n",p->nb_coup);
+    for (int i = 0 ; i < 4 ; i ++){
+        for (int j = 0 ; j < 4 ; j++)
+            fprintf(f,"| %d |",p->plateau[i][j]);
+        putc('\n',f);
+    }
+    fclose(f);
+
+}
 
 int main(){
     Partie *nv = nouvelle_partie();
     Affiche_Partie(nv);
+    sauvegarde_partie(nv);
 
 
 
