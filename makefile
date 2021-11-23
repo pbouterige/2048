@@ -1,3 +1,3 @@
 forf all:
-	gcc -o main main.c -lSDL
+	gcc -o main 2048.c
 	./main
