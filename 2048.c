@@ -46,7 +46,7 @@ void jeu(Partie* p){
 
 int main(){
     srand(time(NULL));
-    Partie *nv = nouvelle_partie();
+    Partie *nv = charger_partie();
     jeu(nv);
 
 

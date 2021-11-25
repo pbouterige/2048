@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include <string.h>
+#include <sys/stat.h>
 
 typedef struct Partie
 {
@@ -37,6 +38,39 @@ Partie * nouvelle_partie(){
         int j = rand()%4;
         P->plateau[i][j] = 2;
     }
+    return P;
+}
+
+Partie * charger_partie(){
+    Partie * P = (Partie*)malloc(sizeof(Partie));
+    puts("Voici la liste des sauvegares disponible :");
+    system("ls sauvegarde");
+    FILE * f = NULL;
+    char* rep;
+    while (f==NULL){
+        puts("Veuillez préciser le nom exacte de votre sauvegarde (.txt non necessaire)");
+        char * name = (char *) malloc( 40 );;
+        scanf("%s",name);
+        rep = (char *) malloc( 15 + strlen(name) );
+
+        strcat( rep, "sauvegarde/" );
+        strcat( rep, name );
+        strcat( rep, ".txt" );
+        f = fopen(rep,"r");
+        if (f == NULL)
+            puts("Désolé nous n'avons pu charger votre sauvegarde. Vérifiez son écriture ");
+    }
+    struct stat sb;
+	stat(rep, &sb);
+    char *c = malloc(sb.st_size);
+    int i = -2;
+    while(fscanf(f,"%[^\n] ",c) != EOF){
+        sscanf(c, "score : %d",&P->score);
+        sscanf(c, "nombre de coups : %d",&P->nb_coup);
+        sscanf(c, "| %d || %d || %d || %d |",&P->plateau[i][0],&P->plateau[i][1],&P->plateau[i][2],&P->plateau[i][3]);
+        i++;
+    }
+    fclose(f);
     return P;
 }
 
