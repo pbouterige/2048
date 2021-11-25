@@ -1,5 +1,6 @@
 #include "fonction.c"
 
+
 void jeu(Partie* p){
     char direction;
     int fin_de_partie = 1;
@@ -26,7 +27,7 @@ void jeu(Partie* p){
         }
         else if(direction == 'q'){
             while(1){
-                puts("voulez-vous sauvegarder votre partie avant de quitter? O\\n");
+                puts("Voulez-vous sauvegarder votre partie avant de quitter? O\\n");
                 scanf("%c",&direction);
                 while (getchar() != '\n') {}
                 if (direction == 'O'){
@@ -44,11 +45,42 @@ void jeu(Partie* p){
 }
 
 
+void menu() {
+    int choix = 0;
+    while (choix != 1 && choix != 2 && choix != 3)
+    {
+        puts("Démarrer une nouvelle partie         [1]");
+        puts("Continuer une partie en cours        [2]");
+        puts("Quitter                              [3]\n");
+        scanf("%d", &choix);
+        
+        if (choix == 1)  //commence une nouvelle partie
+        {
+            Partie *nv = nouvelle_partie();
+            jeu(nv);
+        }
+        else if (choix == 2) //reprend une ancienne partie sauvegardée
+        {
+            Partie *nv = charger_partie();
+            jeu(nv);
+        }
+        else if (choix == 3) //quitte le jeu
+        {
+            exit;
+        }
+        else
+        {
+            puts("choix incorrect");
+            while (getchar() != '\n')
+            {
+            }
+        }
+    }
+}
+
 int main(){
     srand(time(NULL));
-    Partie *nv = charger_partie();
-    jeu(nv);
-
+    menu();
 
     return 0;
 }
