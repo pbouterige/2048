@@ -43,19 +43,18 @@ Partie * nouvelle_partie(){
 
 Partie * charger_partie(){
     Partie * P = (Partie*)malloc(sizeof(Partie));
-    puts("Voici la liste des sauvegares disponible :");
+    puts("Voici la liste des sauvegares disponible :\n");
     system("ls sauvegarde");
     FILE * f = NULL;
     char* rep;
     while (f==NULL){
-        puts("Veuillez préciser le nom exacte de votre sauvegarde (.txt non necessaire)");
+        puts("\nVeuillez préciser le nom exacte de votre sauvegarde");
         char * name = (char *) malloc( 40 );;
         scanf("%s",name);
         rep = (char *) malloc( 15 + strlen(name) );
 
         strcat( rep, "sauvegarde/" );
         strcat( rep, name );
-        strcat( rep, ".txt" );
         f = fopen(rep,"r");
         if (f == NULL)
             puts("Désolé nous n'avons pu charger votre sauvegarde. Vérifiez son écriture ");
@@ -71,23 +70,33 @@ Partie * charger_partie(){
         i++;
     }
     fclose(f);
+    while (getchar() != '\n') {}
     return P;
 }
 
 void Affiche_Partie(Partie * p){
     puts("");
-    printf("score : %d                        coup : %d \n",p->score,p->nb_coup);
-    puts("-----------------------------------------\n");
-    puts("        ----   ----   ----   ----        ");
-    printf("       | %d  | | %d  | | %d  | | %d  |       \n",p->plateau[0][0],p->plateau[0][1],p->plateau[0][2],p->plateau[0][3]);
-    puts("        ----   ----   ----   ----        ");
-    printf("       | %d  | | %d  | | %d  | | %d  |       \n",p->plateau[1][0],p->plateau[1][1],p->plateau[1][2],p->plateau[1][3]);
-    puts("        ----   ----   ----   ----        ");
-    printf("       | %d  | | %d  | | %d  | | %d  |       \n",p->plateau[2][0],p->plateau[2][1],p->plateau[2][2],p->plateau[2][3]);
-    puts("        ----   ----   ----   ----        ");
-    printf("       | %d  | | %d  | | %d  | | %d  |       \n",p->plateau[3][0],p->plateau[3][1],p->plateau[3][2],p->plateau[3][3]);
-    puts("        ----   ----   ----   ----        ");
-    puts("\n-----------------------------------------\n");
+    printf("score : %d                             coup : %d \n",p->score,p->nb_coup);
+    puts("-----------------------------------------------");
+    for (int i = 0 ; i < 4 ; i++){
+        puts("\n     -------   -------   -------   -------        ");
+        puts("    |       | |       | |       | |       |       ");
+        printf("    ");
+        for (int j = 0 ; j < 4 ; j++){
+            if(p->plateau[i][j] <10)
+                printf("|   %d   | ",p->plateau[i][j]);
+            else if(p->plateau[i][j] <100)
+                printf("|   %d  | ",p->plateau[i][j]);
+            else if(p->plateau[i][j] <1000)
+                printf("|  %d  | ",p->plateau[i][j]);
+            else
+                printf("|  %d | ",p->plateau[i][j]);
+            
+        }
+        printf("\n    |       | |       | |       | |       |       ");
+    }
+    puts("\n     -------   -------   -------   -------        ");
+    puts("\n-----------------------------------------------\n");
 
  
 }
