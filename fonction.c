@@ -4,11 +4,13 @@
 #include <string.h>
 #include <sys/stat.h>
 
+
 typedef struct Partie
 {
     int plateau[4][4];
     int score;
     int nb_coup;
+    int fused[4][4];
 
 }Partie;
 
@@ -27,8 +29,10 @@ int case_libre(Partie *p,int I[16], int J[16]){
 Partie * nouvelle_partie(){
     Partie * P = (Partie*)malloc(sizeof(Partie));
     for (int i = 0 ; i < 4 ; i++)
-        for (int j = 0 ; j < 4 ; j++)
+        for (int j = 0 ; j < 4 ; j++){
             P->plateau[i][j] = 0;
+            P->fused[i][j] = 0;
+        }
     P ->score = 0;
     P ->nb_coup = 0;
     int I[16];
@@ -140,8 +144,16 @@ int nouvelle_case(Partie *p){
     return 1;
 }
 
+void reset_fused(Partie* p){
+    for (int i = 0 ; i < 4 ; i++)
+        for (int j = 0 ; j < 4 ; j++)
+            p->fused[i][j] = 0;
+}
+
+
 int swipe_left(Partie* p){
     int mouvement = 1, nb_mouvement = 0;
+    reset_fused(p);
     while(mouvement){
         mouvement = 0;
         for (int i = 0 ; i < 4 ; i++){
@@ -149,12 +161,15 @@ int swipe_left(Partie* p){
                 if (p->plateau[i][j+1] != 0 && p->plateau[i][j] == 0){
                     p->plateau[i][j] = p->plateau[i][j+1];
                     p->plateau[i][j+1] = 0;
+                    p->fused[i][j] = p->fused[i][j+1];
+                    p->fused[i][j+1] = 0;
                     mouvement++;
                     nb_mouvement++;
                 }
-                if (p->plateau[i][j+1]!=0  && p->plateau[i][j] == p->plateau[i][j+1]){
+                if (p->plateau[i][j+1]!=0  && p->plateau[i][j] == p->plateau[i][j+1] && !(p->fused[i][j]) && !(p->fused[i][j+1])){
                     p->plateau[i][j] += p->plateau[i][j+1];
                     p->plateau[i][j+1] = 0;
+                    p->fused[i][j] = 1;
                     mouvement++;
                     nb_mouvement++;
                     p->score += p->plateau[i][j];
@@ -170,6 +185,7 @@ int swipe_left(Partie* p){
 
 int swipe_right(Partie* p){
     int mouvement = 1, nb_mouvement = 0;
+    reset_fused(p);
     while(mouvement){
         mouvement = 0;
         for (int i = 0 ; i < 4 ; i++){
@@ -177,12 +193,15 @@ int swipe_right(Partie* p){
                 if (p->plateau[i][j-1]!=0 && p->plateau[i][j] == 0){
                     p->plateau[i][j] = p->plateau[i][j-1];
                     p->plateau[i][j-1] = 0;
+                    p->fused[i][j] = p->fused[i][j-1];
+                    p->fused[i][j-1] = 0;
                     mouvement++;
                     nb_mouvement++;
                 }
-                if (p->plateau[i][j-1]!=0  && p->plateau[i][j-1] == p->plateau[i][j]){
+                if (p->plateau[i][j-1]!=0  && p->plateau[i][j-1] == p->plateau[i][j] && !(p->fused[i][j]) && !(p->fused[i][j-1])){
                     p->plateau[i][j] += p->plateau[i][j-1];
                     p->plateau[i][j-1] = 0;
+                    p->fused[i][j] = 1;
                     mouvement++;
                     nb_mouvement++;
                     p->score += p->plateau[i][j];
@@ -198,6 +217,7 @@ int swipe_right(Partie* p){
 
 int swipe_down(Partie* p){
     int mouvement = 1, nb_mouvement = 0;
+    reset_fused(p);
     while(mouvement){
         mouvement = 0;
         for (int j = 0 ; j < 4 ; j++){
@@ -205,12 +225,15 @@ int swipe_down(Partie* p){
                 if (p->plateau[i-1][j]!=0 && p->plateau[i][j] == 0){
                     p->plateau[i][j] = p->plateau[i-1][j];
                     p->plateau[i-1][j] = 0;
+                    p->fused[i][j] = p->fused[i-1][j];
+                    p->fused[i-1][j] = 0;
                     mouvement++;
                     nb_mouvement++;
                 }
-                if (p->plateau[i-1][j]!=0  && p->plateau[i-1][j] == p->plateau[i][j]){
+                if (p->plateau[i-1][j]!=0  && p->plateau[i-1][j] == p->plateau[i][j] && !(p->fused[i][j]) && !(p->fused[i-1][j])){
                     p->plateau[i][j] += p->plateau[i-1][j];
                     p->plateau[i-1][j] = 0;
+                    p->fused[i][j] = 1;
                     mouvement++;
                     nb_mouvement++;
                     p->score += p->plateau[i][j];
@@ -226,6 +249,7 @@ int swipe_down(Partie* p){
 
 int swipe_up(Partie* p){
     int mouvement = 1, nb_mouvement = 0;
+    reset_fused(p);
     while(mouvement){
         mouvement = 0;
         for (int j = 0 ; j < 4 ; j++){
@@ -233,12 +257,15 @@ int swipe_up(Partie* p){
                 if (p->plateau[i+1][j]!=0 && p->plateau[i][j] == 0){
                     p->plateau[i][j] = p->plateau[i+1][j];
                     p->plateau[i+1][j] = 0;
+                    p->fused[i][j] = p->fused[i+1][j];
+                    p->fused[i+1][j] = 0;
                     mouvement++;
                     nb_mouvement++;
                 }
-                if (p->plateau[i+1][j]!=0  && p->plateau[i+1][j] == p->plateau[i][j]){
+                if (p->plateau[i+1][j]!=0  && p->plateau[i+1][j] == p->plateau[i][j] && !(p->fused[i][j]) && !(p->fused[i+1][j])){
                     p->plateau[i][j] += p->plateau[i+1][j];
                     p->plateau[i+1][j] = 0;
+                    p->fused[i][j] = 1;
                     mouvement++;
                     nb_mouvement++;
                     p->score += p->plateau[i][j];
