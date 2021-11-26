@@ -3,6 +3,7 @@
 #include <time.h>
 #include <string.h>
 #include <sys/stat.h>
+#include <unistd.h>
 
 
 typedef struct Partie
@@ -111,6 +112,7 @@ void sauvegarde_partie(Partie *p){
     char * name = (char *) malloc( 40 );;
     scanf("%s",name);
     char * rep = (char *) malloc( 15 + strlen(name) );
+    *rep = '\0';
 
     strcat( rep, "sauvegarde/" );
     strcat( rep, name );
@@ -279,6 +281,28 @@ int swipe_up(Partie* p){
     return 0;
 }
 
-void End_Of_Game(Partie* p, int * poiteur_FDP){
-
+void End_Of_Game(Partie* p, int * poiteur_FDP, int *test){
+    Partie copie;
+    char choix;
+    for (int i = 0 ; i < 4 ; i++)
+        for (int j = 0 ; j < 4 ; j++){
+            if ((copie.plateau[i][j] = p->plateau[i][j]) == 2048 && *test){
+                Affiche_Partie(p);
+                puts("Bravo! vous avez gagné! Voulez-vous continuer ? O\\n\n");
+                scanf("%c",&choix);
+                while (getchar() != '\n') {}
+                if (choix == 'O')
+                    *test = 0;
+                else 
+                    *poiteur_FDP = 0;
+            }
+        }
+    if (!(swipe_down(&copie) || swipe_up(&copie) || swipe_right(&copie) || swipe_left(&copie))){
+        Affiche_Partie(p);
+        puts("\nFin de partie. Plus de mouvement possible.\n");
+        printf("score  :  %d\n",p->score);
+        printf("nombre de coup  :  %d\n",p->nb_coup);
+        sleep (7);
+        *poiteur_FDP = 0;
+    }
 }

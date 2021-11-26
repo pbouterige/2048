@@ -3,7 +3,7 @@
 
 void jeu(Partie* p){
     char direction;
-    int fin_de_partie = 1;
+    int fin_de_partie = 1, test = 1;
     while (fin_de_partie){
         Affiche_Partie(p);
         printf("gauche (g), droite (d), haut(h), bas(b)                         (quitter (q))\n");
@@ -40,7 +40,7 @@ void jeu(Partie* p){
 
             }
         }
-        (End_Of_Game(p, &fin_de_partie));
+        (End_Of_Game(p, &fin_de_partie,&test));
     }
 }
 
