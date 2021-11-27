@@ -1,3 +1,3 @@
 forf all:
-	gcc -o main 2048.c
-	./main
+	gcc -o sdl SDL.c -lSDL_image -lSDL
+	./sdl
