@@ -1,10 +1,10 @@
-#include <stdio.h>
-#include <stdlib.h>
+#include "fonction.c"
 #include <SDL/SDL.h>
 #include <SDL/SDL_image.h>
+#include <math.h>
 
 
-void pause(){
+void pauseWin(){
 // cette fonction permet de mettre en pause le programme
 // pour éviter que la fenêtre se ferme aussitôt ouverte
     int continuer = 1;
@@ -26,6 +26,7 @@ int main(){
     SDL_Surface *ecran = NULL;
     SDL_Surface *plateau = NULL;
     SDL_Surface *cases = NULL;
+    SDL_Surface *icone = NULL;
     SDL_Rect position, positionCase;
 
 
@@ -37,6 +38,8 @@ int main(){
         // On quitte le programme
     }
 
+    icone = IMG_Load("image/icone2.png");
+    SDL_WM_SetIcon(icone,NULL);
 
     // ouvre une fenêtre de taille 800 x 600 en 32 bits / pixel
     ecran = SDL_SetVideoMode(900, 900, 32, SDL_HWSURFACE);    
@@ -46,35 +49,46 @@ int main(){
 
     SDL_FillRect(ecran, NULL, SDL_MapRGB(ecran->format, 248, 239, 222));
 
-    plateau = SDL_CreateRGBSurface(SDL_HWSURFACE, 600, 600, 32, 0, 0, 0, 0);
-    cases = SDL_CreateRGBSurface(SDL_HWSURFACE, 120, 120, 32, 0, 0, 0, 0);
+    plateau = IMG_Load("image/plateau.png");
+    cases = IMG_Load("image/0.png");
 
-    // Remplissage du plateau
-    SDL_FillRect(plateau, NULL, SDL_MapRGB(ecran->format, 145, 124, 111)); 
-    SDL_FillRect(cases, NULL, SDL_MapRGB(ecran->format, 187, 174, 166)); 
 
-    position.x = 150;    // Les coordonnées de la surface seront (0, 0)
+    position.x = 150;    // Les coordonnées de la surface seront (150, 200)
     position.y = 200;
-    positionCase.x = 30;    // Les coordonnées de la surface seront (0, 0)
+    positionCase.x = 30;    
     positionCase.y = 80;
 
 
     // Collage de la surface sur l'écran
     SDL_BlitSurface(plateau, NULL, ecran, &position);
     
+
+    int k = 1;
+    char * nom_img = (char*)malloc(16);
+    char * numero = (char*)malloc(10);
+
     for (int i = 0 ; i < 4 ; i++){
-        positionCase.x += 144;
+        positionCase.y += 144;
         for (int j = 0 ; j < 4 ; j++){
-            positionCase.y += 144;
+            *nom_img = '\0';
+            strcat(nom_img,"image/");
+            int a = (int)pow(2,k);
+            sprintf(numero, "%d", a);
+            strcat(numero,".png");
+            strcat(nom_img,numero);
+            printf("%s \n", nom_img);
+            k++;
+            positionCase.x += 144;
             SDL_BlitSurface(cases, NULL, ecran, &positionCase);
+            cases = IMG_Load(nom_img);
         }
-        positionCase.y = 80;
+        positionCase.x = 30;
     }
 
 
     
     SDL_Flip(ecran);   // Mise à jour de l'écran
-    pause();           // mise en pause du programme
+    pauseWin();           // mise en pause du programme
 
     SDL_FreeSurface(cases);     // Libération de la surface
     SDL_FreeSurface(plateau); 
