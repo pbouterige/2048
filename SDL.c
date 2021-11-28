@@ -1,7 +1,75 @@
 #include "fonction.c"
 #include <SDL/SDL.h>
 #include <SDL/SDL_image.h>
+#include <SDL/SDL_ttf.h>
 #include <math.h>
+
+void AffichageSDL(Partie* p, SDL_Surface * ecran, SDL_Surface* cases, SDL_Surface* score){
+    SDL_Rect positionCase;
+    positionCase.x = 30;    
+    positionCase.y = 80;
+    char * nom_img = (char*)malloc(16);
+    char * numero = (char*)malloc(10);
+    for (int i = 0 ; i < 4 ; i++){
+        positionCase.y += 144;
+        for (int j = 0 ; j < 4 ; j++){
+            *nom_img = '\0';
+            strcat(nom_img,"image/");
+            sprintf(numero, "%d", p->plateau[i][j]);
+            strcat(numero,".png");
+            strcat(nom_img,numero);
+            positionCase.x += 144;
+            cases = IMG_Load(nom_img);
+            SDL_BlitSurface(cases, NULL, ecran, &positionCase);
+        }
+        positionCase.x = 30;
+    }
+    SDL_Flip(ecran);
+}
+
+
+void jeuSDL(Partie* p, SDL_Surface * ecran, SDL_Surface* cases, SDL_Surface* score){
+    SDL_Event event;
+    int fin_de_partie = 1, test = 1;
+    while (fin_de_partie){
+        AffichageSDL(p,ecran,cases,score);
+        if( SDL_PollEvent( &event ) ) {
+            if(event.type == SDLK_LEFT && swipe_left(p)){
+                p->nb_coup ++;
+                nouvelle_case(p);
+            }
+            else if(event.type == SDLK_RIGHT && swipe_right(p)){
+                p->nb_coup ++;
+                nouvelle_case(p);
+            }
+            else if(event.type == SDLK_DOWN && swipe_down(p)){
+                p->nb_coup ++;
+                nouvelle_case(p);
+            }
+            else if(event.type == SDLK_UP && swipe_up(p)){
+                p->nb_coup ++;
+                nouvelle_case(p);
+            }
+            else if(event.type == SDLK_ESCAPE){
+                while(1){
+                    puts("Voulez-vous sauvegarder votre partie avant de quitter? O\\n");
+                    char direction;
+                    scanf("%c",&direction);
+                    while (getchar() != '\n') {}
+                    if (direction == 'O'){
+                        sauvegarde_partie(p);
+                        return ;
+                    }
+                    else if (direction == 'n')
+                        return;
+                    puts("Désolé je ne vous ai pas compris.");
+                }
+            }
+        }
+        (End_Of_Game(p, &fin_de_partie,&test));
+    }
+}
+
 
 
 void pauseWin(){
@@ -23,11 +91,13 @@ void pauseWin(){
 
 
 int main(){
+    srand(time(NULL));
     SDL_Surface *ecran = NULL;
     SDL_Surface *plateau = NULL;
     SDL_Surface *cases = NULL;
     SDL_Surface *icone = NULL;
-    SDL_Rect position, positionCase;
+    SDL_Surface *score = NULL;
+    SDL_Rect position;
 
 
     // Démarrage de la SDL (ici : chargement du système vidéo)
@@ -55,44 +125,23 @@ int main(){
 
     position.x = 150;    // Les coordonnées de la surface seront (150, 200)
     position.y = 200;
-    positionCase.x = 30;    
-    positionCase.y = 80;
+    
 
 
     // Collage de la surface sur l'écran
     SDL_BlitSurface(plateau, NULL, ecran, &position);
     
+    Partie* p = nouvelle_partie();
+    jeuSDL(p,ecran,cases,score);
 
-    int k = 1;
-    char * nom_img = (char*)malloc(16);
-    char * numero = (char*)malloc(10);
-
-    for (int i = 0 ; i < 4 ; i++){
-        positionCase.y += 144;
-        for (int j = 0 ; j < 4 ; j++){
-            *nom_img = '\0';
-            strcat(nom_img,"image/");
-            int a = (int)pow(2,k);
-            sprintf(numero, "%d", a);
-            strcat(numero,".png");
-            strcat(nom_img,numero);
-            printf("%s \n", nom_img);
-            k++;
-            positionCase.x += 144;
-            SDL_BlitSurface(cases, NULL, ecran, &positionCase);
-            cases = IMG_Load(nom_img);
-        }
-        positionCase.x = 30;
-    }
-
-
-    
-    SDL_Flip(ecran);   // Mise à jour de l'écran
     pauseWin();           // mise en pause du programme
 
     SDL_FreeSurface(cases);     // Libération de la surface
     SDL_FreeSurface(plateau); 
     SDL_FreeSurface(ecran); 
+    SDL_FreeSurface(icone); 
+    SDL_FreeSurface(score); 
+    free(p);
 
     SDL_Quit();        // Arrêt de la SDL (libération de la mémoire).
 
