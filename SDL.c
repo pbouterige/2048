@@ -36,37 +36,44 @@ void jeuSDL(Partie* p, SDL_Surface* ecran, SDL_Surface* cases,
     while (fin_de_partie) {
         SDL_WaitEvent(&event);
         AffichageSDL(p, ecran, cases, score);
-        if (event.key.keysym.sym == SDLK_LEFT && swipe_left(p)) {
-            p->nb_coup++;
-            nouvelle_case(p);
-        } else if (event.key.keysym.sym == SDLK_RIGHT && swipe_right(p)) {
-            p->nb_coup++;
-            nouvelle_case(p);
-        } else if (event.key.keysym.sym == SDLK_DOWN && swipe_down(p)) {
-            p->nb_coup++;
-            nouvelle_case(p);
-        } else if (event.key.keysym.sym == SDLK_UP && swipe_up(p)) {
-            p->nb_coup++;
-            nouvelle_case(p);
-        } else if (event.key.keysym.sym == SDLK_ESCAPE) {
-            while (1) {
-                puts(
-                    "Voulez-vous sauvegarder votre partie avant de "
-                    "quitter? O\\n");
-                char direction;
-                scanf("%c", &direction);
-                while (getchar() != '\n') {
+        switch (event.type) {
+            case SDL_QUIT:  // quitte et ferme la fenêtre
+                return;
+                break;
+            case SDL_KEYDOWN:
+                if (event.key.keysym.sym == SDLK_LEFT && swipe_left(p)) {
+                    p->nb_coup++;
+                    nouvelle_case(p);
+                } else if (event.key.keysym.sym == SDLK_RIGHT &&
+                           swipe_right(p)) {
+                    p->nb_coup++;
+                    nouvelle_case(p);
+                } else if (event.key.keysym.sym == SDLK_DOWN && swipe_down(p)) {
+                    p->nb_coup++;
+                    nouvelle_case(p);
+                } else if (event.key.keysym.sym == SDLK_UP && swipe_up(p)) {
+                    p->nb_coup++;
+                    nouvelle_case(p);
+                } else if (event.key.keysym.sym == SDLK_ESCAPE) {
+                    while (1) {
+                        puts(
+                            "Voulez-vous sauvegarder votre partie avant de "
+                            "quitter? O\\n");
+                        char direction;
+                        scanf("%c", &direction);
+                        while (getchar() != '\n') {
+                        }
+                        if (direction == 'O') {
+                            sauvegarde_partie(p);
+                            return;
+                        } else if (direction == 'n')
+                            return;
+                        puts("Désolé je ne vous ai pas compris.");
+                    }
                 }
-                if (direction == 'O') {
-                    sauvegarde_partie(p);
-                    return;
-                } else if (direction == 'n')
-                    return;
-                puts("Désolé je ne vous ai pas compris.");
-            }
+                (End_Of_Game(p, &fin_de_partie, &test));
+                break;
         }
-        if (event.key.keysym.sym == SDLK_F1) return;
-        (End_Of_Game(p, &fin_de_partie, &test));
     }
 }
 
@@ -127,8 +134,6 @@ int main() {
 
     Partie* p = nouvelle_partie();
     jeuSDL(p, ecran, cases, score);
-
-    pauseWin();  // mise en pause du programme
 
     SDL_FreeSurface(cases);  // Libération de la surface
     SDL_FreeSurface(plateau);
