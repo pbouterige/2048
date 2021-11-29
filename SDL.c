@@ -2,7 +2,6 @@
 #include <SDL/SDL_image.h>
 #include <SDL/SDL_ttf.h>
 #include <math.h>
-
 #include "fonction.c"
 
 void AffichageSDL(Partie* p, SDL_Surface* ecran, SDL_Surface* cases,
@@ -27,6 +26,35 @@ void AffichageSDL(Partie* p, SDL_Surface* ecran, SDL_Surface* cases,
         positionCase.x = 30;
     }
     SDL_Flip(ecran);
+}
+
+
+void End_Of_SDL(Partie* p, int * poiteur_FDP, int *test, SDL_Surface* ecran, SDL_Surface* cases,
+            SDL_Surface* score){
+    Partie copie;
+    char choix;
+    for (int i = 0 ; i < 4 ; i++)
+        for (int j = 0 ; j < 4 ; j++){
+            if ((copie.plateau[i][j] = p->plateau[i][j]) == 2048 && *test){
+                AffichageSDL(p, ecran, cases, score);
+                sleep(2);
+                puts("Bravo! vous avez gagné! Voulez-vous continuer ? O\\n\n");
+                scanf("%c",&choix);
+                while (getchar() != '\n') {}
+                if (choix == 'O')
+                    *test = 0;
+                else 
+                    *poiteur_FDP = 0;
+            }
+        }
+    if (!(swipe_down(&copie) || swipe_up(&copie) || swipe_right(&copie) || swipe_left(&copie))){
+        AffichageSDL(p, ecran, cases, score);
+        puts("\nFin de partie. Plus de mouvement possible.\n");
+        printf("score  :  %d\n",p->score);
+        printf("nombre de coup  :  %d\n",p->nb_coup);
+        sleep (4);
+        *poiteur_FDP = 0;
+    }
 }
 
 void jeuSDL(Partie* p, SDL_Surface* ecran, SDL_Surface* cases,
@@ -54,28 +82,15 @@ void jeuSDL(Partie* p, SDL_Surface* ecran, SDL_Surface* cases,
                 } else if (event.key.keysym.sym == SDLK_UP && swipe_up(p)) {
                     p->nb_coup++;
                     nouvelle_case(p);
-                } else if (event.key.keysym.sym == SDLK_ESCAPE) {
-                    while (1) {
-                        puts(
-                            "Voulez-vous sauvegarder votre partie avant de "
-                            "quitter? O\\n");
-                        char direction;
-                        scanf("%c", &direction);
-                        while (getchar() != '\n') {
-                        }
-                        if (direction == 'O') {
-                            sauvegarde_partie(p);
-                            return;
-                        } else if (direction == 'n')
-                            return;
-                        puts("Désolé je ne vous ai pas compris.");
-                    }
-                }
-                (End_Of_Game(p, &fin_de_partie, &test));
+                } else if (event.key.keysym.sym == SDLK_ESCAPE) 
+                        return;
+                (End_Of_SDL(p, &fin_de_partie, &test,ecran , cases , score));
                 break;
         }
     }
 }
+
+
 
 void pauseWin() {
     // cette fonction permet de mettre en pause le programme
