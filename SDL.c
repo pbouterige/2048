@@ -25,6 +25,10 @@ void AffichageSDL(Partie* p, SDL_Surface* ecran, SDL_Surface* cases,
         }
         positionCase.x = 30;
     }
+    positionCase.x = 450;
+    positionCase.y = 75;
+    score = IMG_Load("image/score.png");
+    SDL_BlitSurface(score, NULL, ecran, &positionCase);
     SDL_Flip(ecran);
 }
 
@@ -49,11 +53,15 @@ void End_Of_SDL(Partie* p, int * poiteur_FDP, int *test, SDL_Surface* ecran, SDL
         }
     if (!(swipe_down(&copie) || swipe_up(&copie) || swipe_right(&copie) || swipe_left(&copie))){
         AffichageSDL(p, ecran, cases, score);
-        puts("\nFin de partie. Plus de mouvement possible.\n");
-        printf("score  :  %d\n",p->score);
-        printf("nombre de coup  :  %d\n",p->nb_coup);
-        sleep (4);
+        sleep (1);
+        SDL_Surface * plateau = IMG_Load("image/game_over.png");
+        SDL_Rect position;
+        position.x =150;
+        position.y =200;
+        SDL_BlitSurface(plateau,NULL,ecran,&position);
+        SDL_Flip(ecran);
         *poiteur_FDP = 0;
+        sleep (4);
     }
 }
 
