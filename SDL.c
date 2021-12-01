@@ -6,7 +6,7 @@
 #include "fonction.c"
 
 void AffichageSDL(Partie* p, SDL_Surface* ecran, SDL_Surface* cases,
-                  SDL_Surface* score) {
+                  SDL_Surface* score, TTF_Font* police, SDL_Surface *texte) {
     SDL_Rect positionCase;
     positionCase.x = 30;
     positionCase.y = 80;
@@ -26,21 +26,31 @@ void AffichageSDL(Partie* p, SDL_Surface* ecran, SDL_Surface* cases,
         }
         positionCase.x = 30;
     }
-    positionCase.x = 450;
-    positionCase.y = 75;
+    positionCase.x = 470;
+    positionCase.y = 55;
     score = IMG_Load("image/score.png");
     SDL_BlitSurface(score, NULL, ecran, &positionCase);
+
+    SDL_Color couleurNoire = {0, 0, 0};
+    char c_score[8];
+    sprintf(c_score, "%d", p->score);
+
+    texte = TTF_RenderText_Solid(police, c_score, couleurNoire);
+    positionCase.x = 600;
+    positionCase.y = 75;
+    SDL_BlitSurface(texte, NULL, ecran, &positionCase);
+
     SDL_Flip(ecran);
 }
 
 void End_Of_SDL(Partie* p, int* poiteur_FDP, int* test, SDL_Surface* ecran,
-                SDL_Surface* cases, SDL_Surface* score) {
+                SDL_Surface* cases, SDL_Surface* score, TTF_Font *police, SDL_Surface *texte) {
     Partie copie;
     char choix;
     for (int i = 0; i < 4; i++)
         for (int j = 0; j < 4; j++) {
             if ((copie.plateau[i][j] = p->plateau[i][j]) == 2048 && *test) {
-                AffichageSDL(p, ecran, cases, score);
+                AffichageSDL(p, ecran, cases, score, police, texte);
                 sleep(2);
                 puts("Bravo! vous avez gagné! Voulez-vous continuer ? O\\n\n");
                 scanf("%c", &choix);
@@ -54,7 +64,7 @@ void End_Of_SDL(Partie* p, int* poiteur_FDP, int* test, SDL_Surface* ecran,
         }
     if (!(swipe_down(&copie) || swipe_up(&copie) || swipe_right(&copie) ||
           swipe_left(&copie))) {
-        AffichageSDL(p, ecran, cases, score);
+        AffichageSDL(p, ecran, cases, score, police, texte);
         sleep(1);
         SDL_Surface* plateau = IMG_Load("image/game_over.png");
         SDL_Rect position;
@@ -68,12 +78,12 @@ void End_Of_SDL(Partie* p, int* poiteur_FDP, int* test, SDL_Surface* ecran,
 }
 
 void jeuSDL(Partie* p, SDL_Surface* ecran, SDL_Surface* cases,
-            SDL_Surface* score) {
+            SDL_Surface* score, TTF_Font *police, SDL_Surface *texte) {
     SDL_Event event;
     int fin_de_partie = 1, test = 1;
     while (fin_de_partie) {
         SDL_WaitEvent(&event);
-        AffichageSDL(p, ecran, cases, score);
+        AffichageSDL(p, ecran, cases, score, police, texte);
         switch (event.type) {
             case SDL_QUIT:  // quitte et ferme la fenêtre
                 return;
@@ -94,7 +104,7 @@ void jeuSDL(Partie* p, SDL_Surface* ecran, SDL_Surface* cases,
                     nouvelle_case(p);
                 } else if (event.key.keysym.sym == SDLK_ESCAPE)
                     return;
-                (End_Of_SDL(p, &fin_de_partie, &test, ecran, cases, score));
+                (End_Of_SDL(p, &fin_de_partie, &test, ecran, cases, score, police, texte));
                 break;
         }
     }
@@ -160,8 +170,11 @@ int main() {
     // Collage de la surface sur l'écran
     SDL_BlitSurface(plateau, NULL, ecran, &position);
 
+    TTF_Font* police = TTF_OpenFont("policeScore.ttf", 50);
+    SDL_Surface *texte = NULL;
+
     Partie* p = nouvelle_partie();
-    jeuSDL(p, ecran, cases, score);
+    jeuSDL(p, ecran, cases, score, police, texte);
 
     SDL_FreeSurface(cases);  // Libération de la surface
     SDL_FreeSurface(plateau);
@@ -169,6 +182,8 @@ int main() {
     SDL_FreeSurface(icone);
     SDL_FreeSurface(score);
     free(p);
+
+    TTF_CloseFont(police);
 
     TTF_Quit();
     SDL_Quit();  // Arrêt de la SDL (libération de la mémoire).
