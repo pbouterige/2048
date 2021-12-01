@@ -98,17 +98,13 @@ void End_Of_SDL(Partie* p, int* poiteur_FDP, int* test, SDL_Surface* ecran,
         position.x = 150;
         position.y = 200;
         SDL_BlitSurface(plateau, NULL, ecran, &position);
-
-        SDL_Color couleur = {80, 80, 80};
+        SDL_Color couleurNoire = {100, 100, 100};
         char c_score[8];
         sprintf(c_score, "%d", p->score);
-
-        police = TTF_OpenFont("policeScore.ttf", 85);
-        texte = TTF_RenderText_Solid(police, c_score, couleur);
-        position.x = 377;
-        position.y = 580;
+        texte = TTF_RenderText_Solid(police, c_score, couleurNoire);
+        position.x = 550;
+        position.y = 700;
         SDL_BlitSurface(texte, NULL, ecran, &position);
-
         SDL_Flip(ecran);
         *poiteur_FDP = 0;
         sleep(12);
@@ -147,23 +143,6 @@ void jeuSDL(Partie* p, SDL_Surface* ecran, SDL_Surface* cases,
                 (End_Of_SDL(p, &fin_de_partie, &test, ecran, cases, score,
                             police, texte, temps, tempsActuel, tempsPrecedent,
                             compteur));
-                break;
-        }
-    }
-}
-
-void pauseWin() {
-    // cette fonction permet de mettre en pause le programme
-    // pour éviter que la fenêtre se ferme aussitôt ouverte
-    int continuer = 1;
-    SDL_Event event;
-    while (continuer) {
-        SDL_WaitEvent(&event);
-        switch (event.type) {
-            case SDL_QUIT:  // quitte et ferme la fenêtre
-                continuer = 0;
-                break;
-            default:  // ne fait rien
                 break;
         }
     }
@@ -225,7 +204,7 @@ int main() {
     // Collage de la surface sur l'écran
     SDL_BlitSurface(plateau, NULL, ecran, &position);
 
-    TTF_Font* police = TTF_OpenFont("policeScore.ttf", 50);
+    police = TTF_OpenFont("C800.ttf", 45);
     SDL_Surface* texte = NULL;
     int tempsActuel = 0, tempsPrecedent = 0, compteur = 0;
     char temps[20] = "";
@@ -233,6 +212,7 @@ int main() {
     // Initialisation du temps
     tempsActuel = SDL_GetTicks();
     sprintf(temps, "%d", compteur);
+    police = TTF_OpenFont("C800.ttf", 45);
 
     Partie* p = nouvelle_partie();
     jeuSDL(p, ecran, cases, score, police, texte, temps, tempsActuel,
