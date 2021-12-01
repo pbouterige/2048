@@ -52,9 +52,9 @@ Partie * charger_partie(){
     system("ls sauvegarde");
     FILE * f = NULL;
     char* rep;
+    char * name = (char *) malloc( 40 );;
     while (f==NULL){
         puts("\nVeuillez préciser le nom exacte de votre sauvegarde");
-        char * name = (char *) malloc( 40 );;
         scanf("%s",name);
         rep = (char *) malloc( 15 + strlen(name) );
 
@@ -76,6 +76,9 @@ Partie * charger_partie(){
     }
     fclose(f);
     while (getchar() != '\n') {}
+    free(name);
+    free(rep);
+    free(c);
     return P;
 }
 
@@ -130,20 +133,20 @@ void sauvegarde_partie(Partie *p){
         putc('\n',f);
     }
     fclose(f);
-
+    free(name);
+    free(rep);
 }
 
-int nouvelle_case(Partie *p){
+void nouvelle_case(Partie *p){
     int I[16] , J[16];
     int c = case_libre(p,I,J);
     if (c == 0)
-        return 0;
+        return ;
     int indice = rand()%c;
     if (rand()%10 == 9)
         p->plateau[I[indice]][J[indice]] = 4;
     else
         p->plateau[I[indice]][J[indice]] = 2;
-    return 1;
 }
 
 void reset_fused(Partie* p){

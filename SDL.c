@@ -102,8 +102,8 @@ void End_Of_SDL(Partie* p, int* poiteur_FDP, int* test, SDL_Surface* ecran,
         char c_score[8];
         sprintf(c_score, "%d", p->score);
         texte = TTF_RenderText_Solid(police, c_score, couleurNoire);
-        position.x = 550;
-        position.y = 700;
+        position.x = 400;
+        position.y = 550;
         SDL_BlitSurface(texte, NULL, ecran, &position);
         SDL_Flip(ecran);
         *poiteur_FDP = 0;
