@@ -205,7 +205,6 @@ int main() {
     SDL_BlitSurface(plateau, NULL, ecran, &position);
 
     police = TTF_OpenFont("C800.ttf", 45);
-    SDL_Surface* texte = NULL;
     int tempsActuel = 0, tempsPrecedent = 0, compteur = 0;
     char temps[20] = "";
 
