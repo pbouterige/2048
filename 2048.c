@@ -2,6 +2,7 @@
 
 void menu() {
     int choix = 0;
+    char sdl = 0;
     while (choix != 1 && choix != 2 && choix != 3)
     {
         puts("\nDémarrer une nouvelle partie         [1]");
@@ -13,13 +14,26 @@ void menu() {
         {
             while (getchar() != '\n'){}
             Partie *nv = nouvelle_partie();
-            jeu(nv);
+            puts(" Voulez vous jouer en SDL ? o/n");
+            scanf("%c", &sdl);
+            while (getchar() != '\n'){}
+            if (sdl == 'o')
+                SDL_launch(nv);
+            else
+                jeu(nv);
             menu();
         }
         else if (choix == 2) //reprend une ancienne partie sauvegardée
         {
+            while (getchar() != '\n'){}
             Partie *nv = charger_partie();
-            jeu(nv);
+            puts(" Voulez vous jouer en SDL ? o/n");
+            scanf("%c", &sdl);
+            while (getchar() != '\n'){}
+            if (sdl == 'n')
+                jeu(nv);
+            else 
+                SDL_launch(nv);
             menu();
         }
         else if (choix == 3) //quitte le jeu
