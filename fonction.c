@@ -18,6 +18,12 @@ int longueur_nombre(int a){
     return longueur;
 }
 
+void cpyTab(int t1[4][4], int t2[4][4]){
+    for (int i = 0 ; i < 4 ; i ++)
+        for (int j = 0 ; j < 4 ; j ++)
+            t2[i][j] = t1[i][j];
+}
+
 
 typedef struct Partie
 {
@@ -25,6 +31,8 @@ typedef struct Partie
     int score;
     int nb_coup;
     int fused[4][4];
+    int precedent[4][4];
+    int score_precedent;
 
 }Partie;
 
@@ -48,6 +56,7 @@ Partie * nouvelle_partie(){
             P->fused[i][j] = 0;
         }
     P ->score = 0;
+    P ->score_precedent = 0;
     P ->nb_coup = 0;
     int I[16];
     int J[16];
@@ -55,6 +64,7 @@ Partie * nouvelle_partie(){
         int i = rand()%4;
         int j = rand()%4;
         P->plateau[i][j] = 2;
+        P->precedent[i][j] = 2;
     }
     return P;
 }
@@ -88,6 +98,10 @@ Partie * charger_partie(){
         sscanf(c, "| %d || %d || %d || %d |",&P->plateau[i][0],&P->plateau[i][1],&P->plateau[i][2],&P->plateau[i][3]);
         i++;
     }
+    for (int i = 0 ; i < 4 ; i++)
+        for (int j = 0 ; j < 4 ; j++)
+            P->precedent[i][j] = P->plateau[i][j];
+    P->score_precedent = P ->score;
     fclose(f);
     while (getchar() != '\n') {}
     free(name);
@@ -178,6 +192,10 @@ int swipe_left(Partie* p){
         for (int i = 0 ; i < 4 ; i++){
             for (int j = 0 ; j < 3 ; j++){
                 if (p->plateau[i][j+1] != 0 && p->plateau[i][j] == 0){
+                    if(nb_mouvement == 0){
+                        p->score_precedent = p->score;
+                        cpyTab(p->plateau,p->precedent);
+                    }
                     p->plateau[i][j] = p->plateau[i][j+1];
                     p->plateau[i][j+1] = 0;
                     p->fused[i][j] = p->fused[i][j+1];
@@ -186,6 +204,10 @@ int swipe_left(Partie* p){
                     nb_mouvement++;
                 }
                 if (p->plateau[i][j+1]!=0  && p->plateau[i][j] == p->plateau[i][j+1] && !(p->fused[i][j]) && !(p->fused[i][j+1])){
+                    if(nb_mouvement == 0){
+                        p->score_precedent = p->score;
+                        cpyTab(p->plateau,p->precedent);
+                    }
                     p->plateau[i][j] += p->plateau[i][j+1];
                     p->plateau[i][j+1] = 0;
                     p->fused[i][j] = 1;
@@ -210,6 +232,10 @@ int swipe_right(Partie* p){
         for (int i = 0 ; i < 4 ; i++){
             for (int j = 3 ; j >=1 ; j--){
                 if (p->plateau[i][j-1]!=0 && p->plateau[i][j] == 0){
+                    if(nb_mouvement == 0){
+                        p->score_precedent = p->score;
+                        cpyTab(p->plateau,p->precedent);
+                    }
                     p->plateau[i][j] = p->plateau[i][j-1];
                     p->plateau[i][j-1] = 0;
                     p->fused[i][j] = p->fused[i][j-1];
@@ -218,6 +244,10 @@ int swipe_right(Partie* p){
                     nb_mouvement++;
                 }
                 if (p->plateau[i][j-1]!=0  && p->plateau[i][j-1] == p->plateau[i][j] && !(p->fused[i][j]) && !(p->fused[i][j-1])){
+                    if(nb_mouvement == 0){
+                        p->score_precedent = p->score;
+                        cpyTab(p->plateau,p->precedent);
+                    }
                     p->plateau[i][j] += p->plateau[i][j-1];
                     p->plateau[i][j-1] = 0;
                     p->fused[i][j] = 1;
@@ -242,6 +272,10 @@ int swipe_down(Partie* p){
         for (int j = 0 ; j < 4 ; j++){
             for (int i = 3 ; i >=1 ; i--){
                 if (p->plateau[i-1][j]!=0 && p->plateau[i][j] == 0){
+                    if(nb_mouvement == 0){
+                        p->score_precedent = p->score;
+                        cpyTab(p->plateau,p->precedent);
+                    }
                     p->plateau[i][j] = p->plateau[i-1][j];
                     p->plateau[i-1][j] = 0;
                     p->fused[i][j] = p->fused[i-1][j];
@@ -250,6 +284,10 @@ int swipe_down(Partie* p){
                     nb_mouvement++;
                 }
                 if (p->plateau[i-1][j]!=0  && p->plateau[i-1][j] == p->plateau[i][j] && !(p->fused[i][j]) && !(p->fused[i-1][j])){
+                    if(nb_mouvement == 0){
+                        p->score_precedent = p->score;
+                        cpyTab(p->plateau,p->precedent);
+                    }
                     p->plateau[i][j] += p->plateau[i-1][j];
                     p->plateau[i-1][j] = 0;
                     p->fused[i][j] = 1;
@@ -274,6 +312,10 @@ int swipe_up(Partie* p){
         for (int j = 0 ; j < 4 ; j++){
             for (int i = 0 ; i < 3 ; i++){
                 if (p->plateau[i+1][j]!=0 && p->plateau[i][j] == 0){
+                    if(nb_mouvement == 0){
+                        p->score_precedent = p->score;
+                        cpyTab(p->plateau,p->precedent);
+                    }
                     p->plateau[i][j] = p->plateau[i+1][j];
                     p->plateau[i+1][j] = 0;
                     p->fused[i][j] = p->fused[i+1][j];
@@ -282,6 +324,10 @@ int swipe_up(Partie* p){
                     nb_mouvement++;
                 }
                 if (p->plateau[i+1][j]!=0  && p->plateau[i+1][j] == p->plateau[i][j] && !(p->fused[i][j]) && !(p->fused[i+1][j])){
+                    if(nb_mouvement == 0){
+                        p->score_precedent = p->score;
+                        cpyTab(p->plateau,p->precedent);
+                    }
                     p->plateau[i][j] += p->plateau[i+1][j];
                     p->plateau[i+1][j] = 0;
                     p->fused[i][j] = 1;
@@ -348,6 +394,11 @@ void jeu(Partie* p){
             p->nb_coup ++;
             nouvelle_case(p);
         }
+        else if(direction == 'r'){
+            p->score = p->score_precedent;
+            cpyTab(p->precedent,p->plateau);
+            p->nb_coup --;
+        }
         else if(direction == 'q'){
             while(1){
                 puts("Voulez-vous sauvegarder votre partie avant de quitter? O\\n");
@@ -395,14 +446,14 @@ void AffichageSDL(Partie* p, SDL_Surface* ecran, SDL_Surface* cases,
     score = IMG_Load("image/score.png");
     SDL_BlitSurface(score, NULL, ecran, &positionCase);
 
-    SDL_Color couleur = {80, 80, 80};
+    SDL_Color couleur = {120, 120, 120};
     SDL_Color couleurNoire = {0, 0, 0}, couleurBlanche = {255, 255, 255};
     char c_score[8];
     sprintf(c_score, "%d", p->score);
 
     texte = TTF_RenderText_Solid(police, c_score, couleur);
     positionCase.x = 600;
-    positionCase.y = 72;
+    positionCase.y = 75;
     SDL_BlitSurface(texte, NULL, ecran, &positionCase);
 
     tempsActuel = SDL_GetTicks();
@@ -482,7 +533,7 @@ void jeuSDL(Partie* p, SDL_Surface* ecran, SDL_Surface* cases,
         SDL_WaitEvent(&event);
         switch (event.type) {
             case SDL_QUIT:  // quitte et ferme la fenêtre
-                exit;
+                return;
                 break;
             case SDL_KEYDOWN:
                 if (event.key.keysym.sym == SDLK_LEFT && swipe_left(p)) {
@@ -499,7 +550,11 @@ void jeuSDL(Partie* p, SDL_Surface* ecran, SDL_Surface* cases,
                     p->nb_coup++;
                     nouvelle_case(p);
                 } else if (event.key.keysym.sym == SDLK_ESCAPE)
-                    exit;
+                    return;
+                else if(event.key.keysym.sym == SDLK_BACKSPACE){
+                    p->score = p->score_precedent;
+                    cpyTab(p->precedent,p->plateau);
+                }
                 AffichageSDL(p, ecran, cases, score, police, texte, temps, tempsActuel,
                      tempsPrecedent, compteur);
                 (End_Of_SDL(p, &fin_de_partie, &test, ecran, cases, score,
@@ -538,7 +593,7 @@ int SDL_launch(Partie* p) {
     TTF_Font* police = NULL;
     police = TTF_OpenFont("C800.ttf", 80);
 
-    SDL_Color couleur_2048 = {227, 157, 66};
+    SDL_Color couleur_2048 = {242, 177, 121};
 
     texte = TTF_RenderText_Blended(police, "2048", couleur_2048);
 
@@ -593,5 +648,5 @@ int SDL_launch(Partie* p) {
     SDL_Quit();  // Arrêt de la SDL (libération de la mémoire).
     
 
-    return EXIT_SUCCESS;  // fermeture du programme
+    return EXIT_SUCCESS; // fermeture du programme
 }
