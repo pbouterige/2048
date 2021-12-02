@@ -3,6 +3,7 @@
 #include <SDL/SDL_ttf.h>
 #include <math.h>
 
+
 #include "fonction.c"
 
 void AffichageSDL(Partie* p, SDL_Surface* ecran, SDL_Surface* cases,
@@ -34,7 +35,7 @@ void AffichageSDL(Partie* p, SDL_Surface* ecran, SDL_Surface* cases,
     SDL_BlitSurface(score, NULL, ecran, &positionCase);
 
     SDL_Color couleur = {80, 80, 80};
-    SDL_Color couleurNoire = {0, 0, 0}, couleurBlanche = {255, 255, 255};
+    SDL_Color couleurNoire = {0, 0, 0};
     char c_score[8];
     sprintf(c_score, "%d", p->score);
 
@@ -44,17 +45,14 @@ void AffichageSDL(Partie* p, SDL_Surface* ecran, SDL_Surface* cases,
     SDL_BlitSurface(texte, NULL, ecran, &positionCase);
 
     tempsActuel = SDL_GetTicks();
-    if (tempsActuel - tempsPrecedent >=
-        100) /* Si 100 ms au moins se sont écoulées */
+    
+    if (tempsActuel - tempsPrecedent >= 100) /* Si 100 ms au moins se sont écoulées */
     {
         compteur += 100; /* On rajoute 100 ms au compteur */
-        sprintf(
-            temps, "Temps : %d",
-            compteur); /* On écrit dans la chaîne "temps" le nouveau temps */
+        sprintf(temps, "%d", compteur); /* On écrit dans la chaîne "temps" le nouveau temps */
         SDL_FreeSurface(texte); /* On supprime la surface précédente */
-        texte = TTF_RenderText_Shaded(
-            police, temps, couleurNoire,
-            couleurBlanche); /* On écrit la chaîne temps dans la SDL_Surface */
+        texte = TTF_RenderText_Solid(
+            police, temps, couleurNoire); /* On écrit la chaîne temps dans la SDL_Surface */
         tempsPrecedent = tempsActuel; /* On met à jour le tempsPrecedent */
     }
 
@@ -117,7 +115,7 @@ void jeuSDL(Partie* p, SDL_Surface* ecran, SDL_Surface* cases,
     SDL_Event event;
     int fin_de_partie = 1, test = 1;
     while (fin_de_partie) {
-        SDL_WaitEvent(&event);
+        SDL_PollEvent(&event);
         AffichageSDL(p, ecran, cases, score, police, texte, temps, tempsActuel,
                      tempsPrecedent, compteur);
         switch (event.type) {
@@ -209,8 +207,7 @@ int main() {
     char temps[20] = "";
 
     // Initialisation du temps
-    tempsActuel = SDL_GetTicks();
-    sprintf(temps, "%d", compteur);
+
     police = TTF_OpenFont("C800.ttf", 45);
 
     Partie* p = nouvelle_partie();
