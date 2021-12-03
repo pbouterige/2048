@@ -437,14 +437,16 @@ void AffichageSDL(Partie* p, SDL_Surface* ecran, SDL_Surface* image,
     image = IMG_Load("image/score.png");
     SDL_BlitSurface(image, NULL, ecran, &positionCase);
 
-    SDL_Color couleur = {120, 120, 120};
+    SDL_Color couleur = {80, 80, 80};
+    SDL_Color couleurfond = {186, 173, 165};
 
-    char c_score[8];
-    sprintf(c_score, "%d", p->score);
+    char c_score[20];
+    sprintf(c_score, "score : %d ", p->score);
 
-    texte = TTF_RenderText_Solid(police, c_score, couleur);
-    positionCase.x = 600;
-    positionCase.y = 75;
+    police = TTF_OpenFont("C800.ttf",25);
+    texte = TTF_RenderText_Shaded(police, c_score, couleur,couleurfond);
+    positionCase.x = 478;
+    positionCase.y = 85;
     SDL_BlitSurface(texte, NULL, ecran, &positionCase);
 
     SDL_Flip(ecran);
@@ -457,34 +459,87 @@ void End_Of_SDL(Partie* p, int* poiteur_FDP, int* test, SDL_Surface* ecran,
     for (int i = 0; i < 4; i++)
         for (int j = 0; j < 4; j++) {
             if ((copie.plateau[i][j] = p->plateau[i][j]) == 2048 && *test) {
+                SDL_Event event;
+                SDL_Color couleurNoire = {100, 100, 100};
+                SDL_Rect position;
+                position.x = 150;
+                position.y = 200;
                 AffichageSDL(p, ecran, image, police, texte);
-                sleep(2);
-                puts("Bravo! vous avez gagné! Voulez-vous continuer ? O\\n\n");
-                scanf("%c", &choix);
-                while (getchar() != '\n') {
+                SDL_Delay(1500);
+                
+                image = IMG_Load("image/plateau.png");
+                SDL_BlitSurface(image, NULL, ecran, &position);
+               
+                police = TTF_OpenFont("C800.ttf", 30);
+               
+                char phrase[30] = "Bravo! vous avez gagne!";
+                texte = TTF_RenderText_Blended(police, phrase, couleurNoire);
+                position.x = 200;
+                position.y = 350;
+                SDL_BlitSurface(texte, NULL, ecran, &position);
+                
+                *phrase = '\0';
+                strcat(phrase,"Voulez vous continuer?");
+                texte = TTF_RenderText_Blended(police, phrase, couleurNoire);
+                position.x = 205;
+                position.y = 450;
+                SDL_BlitSurface(texte, NULL, ecran, &position);
+
+                *phrase = '\0';
+                strcat(phrase,"oui [o]          [n] non");
+                texte = TTF_RenderText_Blended(police, phrase, couleurNoire);
+                position.x = 225;
+                position.y = 600;
+                SDL_BlitSurface(texte, NULL, ecran, &position);
+
+                SDL_Flip(ecran);
+                while (SDL_WaitEvent(&event)) {
+                    if (event.key.keysym.sym == SDLK_o){
+                        *test = 0;
+                        image = IMG_Load("image/plateau.png");
+                        position.x = 150;
+                        position.y = 200;
+                        SDL_BlitSurface(image, NULL, ecran, &position);
+                        AffichageSDL(p, ecran, image, police, texte);
+                        return;
+                    }else if (event.key.keysym.sym == SDLK_n){
+                        *poiteur_FDP = 0;
+                        return;
+                    }
                 }
-                if (choix == 'O')
-                    *test = 0;
-                else
-                    *poiteur_FDP = 0;
             }
         }
     if (!(swipe_down(&copie) || swipe_up(&copie) || swipe_right(&copie) ||
           swipe_left(&copie))) {
         AffichageSDL(p, ecran, image, police, texte);
         sleep(1);
-        SDL_Surface* plateau = IMG_Load("image/game_over.png");
+        SDL_Color couleurNoire = {100, 100, 100};
         SDL_Rect position;
         position.x = 150;
         position.y = 200;
-        SDL_BlitSurface(plateau, NULL, ecran, &position);
-        SDL_Color couleurNoire = {100, 100, 100};
-        char c_score[8];
+
+        image = IMG_Load("image/plateau.png");
+        SDL_BlitSurface(image, NULL, ecran, &position);
+        
+        char phrase[15] = "fin de partie";
+        texte = TTF_RenderText_Blended(police, phrase, couleurNoire);
+        position.x = 250;
+        position.y = 350;
+        SDL_BlitSurface(texte, NULL, ecran, &position);
+
+        char c_score[8] = "score :";
+        texte = TTF_RenderText_Solid(police, c_score, couleurNoire);
+        position.x = 350;
+        position.y = 450;
+        SDL_BlitSurface(texte, NULL, ecran, &position);
+        
+        *c_score = '\0';
         sprintf(c_score, "%d", p->score);
         texte = TTF_RenderText_Solid(police, c_score, couleurNoire);
-        position.x = 430 - 10 * longueur_nombre(p->score);
+        position.x = 445 - 15 * longueur_nombre(p->score);
         position.y = 550;
         SDL_BlitSurface(texte, NULL, ecran, &position);
+        
         SDL_Flip(ecran);
         *poiteur_FDP = 0;
         sleep(7);
@@ -492,10 +547,23 @@ void End_Of_SDL(Partie* p, int* poiteur_FDP, int* test, SDL_Surface* ecran,
 }
 
 void jeuSDL(Partie* p, SDL_Surface* ecran, SDL_Surface* image, TTF_Font* police,
-            SDL_Surface* texte, char tempsS[], char tempsD[], char tempsM[], int tempsActuel,
-            int tempsPrecedent, int* compteurS, int* compteurM) {
+            SDL_Surface* texte) {
     SDL_Event event;
-    int fin_de_partie = 1, test = 1, a = 1, dizaine = 0;
+    SDL_Rect position;
+    SDL_Color couleurNoire = {0, 0, 0}, couleurFond = {248, 239, 222};
+    int fin_de_partie = 1, test = 1, a = 1;
+    
+    // Initialisation du temps
+    char temps[20] = "";
+    int  compteurM = 0, compteurD = 0, compteurS = 0, tempsActuel = 0, tempsPrecedent = 0;
+    
+    sprintf(temps, "%d : %d%d", compteurM,compteurD,compteurS);
+    police = TTF_OpenFont("C800.ttf", 45);
+
+    texte = TTF_RenderText_Blended(police, temps, couleurNoire);
+    position.x = 383;
+    position.y = 800;
+    SDL_BlitSurface(texte, NULL, ecran, &position); /* Blit du texte */
     AffichageSDL(p, ecran, image, police, texte);
     while (fin_de_partie) {
         SDL_PollEvent(&event);
@@ -534,52 +602,25 @@ void jeuSDL(Partie* p, SDL_Surface* ecran, SDL_Surface* image, TTF_Font* police,
                 a = 1;
                 break;
         }
-        SDL_Rect position;
-        SDL_Color couleurNoire = {0, 0, 0};
-        SDL_Color couleurFond = {248, 239, 222};
         tempsActuel = SDL_GetTicks();
-
-
-        // image = SDL_CreateRGBSurface(SDL_HWSURFACE,200,100,32,248,239,222,0);
-        // SDL_FillRect(image, NULL, SDL_MapRGB(ecran->format, 248, 239, 222));
-        // position.x = 350;
-        // position.y = 750;
-       
 
         if (tempsActuel - tempsPrecedent >= 1000) /* Si 100 ms au moins se sont écoulées */
         {
-            // SDL_BlitSurface(image,NULL,ecran,&position);
-            *compteurS += 1; /* On rajoute 1 sec au compteur */
-            if (*compteurS >= 10) {
-                dizaine += 1;
-                *compteurS = 0;
+            compteurS += 1; /* On rajoute 1 sec au compteur */
+            if (compteurS >= 10) {
+                compteurD += 1;
+                compteurS = 0;
             }
-            if (dizaine >= 6) {
-                *compteurM += 1;
-                sprintf(tempsM, "%d ", *compteurM);
-                dizaine = 0;
+            if (compteurD >= 6) {
+                compteurM += 1;
+                compteurD = 0;
             }
-            texte = TTF_RenderText_Shaded(police, tempsM, couleurNoire,couleurFond);
-            position.x = 430 - longueur_nombre(*compteurM) * 35;
-            position.y = 800;
-            SDL_BlitSurface(texte, NULL, ecran,&position); /* Blit du texte */
-
-            sprintf(tempsD, ": %d ", dizaine);
-            texte = TTF_RenderText_Shaded(police, tempsD, couleurNoire, couleurFond);
-            position.x = 445;
-            position.y = 800;
-            SDL_BlitSurface(texte, NULL, ecran, &position); /* Blit du texte */
-
             
-            sprintf(tempsS, "%d ", *compteurS); /* On écrit dans la chaîne temps" le nouveau temps */
-            texte = TTF_RenderText_Shaded(police, tempsS, couleurNoire, couleurFond); /* On écrit la chaîne temps dans la SDL_Surface */
-            position.x = 520;
-            position.y = 800;
+            sprintf(temps, "%d : %d%d ", compteurM, compteurD, compteurS); /* On écrit dans la chaîne temps" le nouveau temps */
+            texte = TTF_RenderText_Shaded(police, temps, couleurNoire, couleurFond); /* On écrit la chaîne temps dans la SDL_Surface */
             SDL_BlitSurface(texte, NULL, ecran, &position); /* Blit du texte */
 
             tempsPrecedent = tempsActuel; /* On met à jour le tempsPrecedent */
-
-            
         }
 
         SDL_Flip(ecran);
@@ -700,37 +741,8 @@ int SDL_launch(Partie* p) {
     SDL_BlitSurface(image, NULL, ecran, &position);
     // Collage de la surface sur l'écran
 
-    police = TTF_OpenFont("C800.ttf", 45);
-    int tempsActuel = 0, tempsPrecedent = 0, compteurS = 0, compteurM = 0;
-    char tempsS[20] = "";
-    char tempsD[20] = "";
-    char tempsM[20] = "";
 
-    // Initialisation du temps
-    tempsActuel = SDL_GetTicks();
-    sprintf(tempsS, "%d", compteurS);
-
-    SDL_Color couleurNoire = {0, 0, 0};
-    police = TTF_OpenFont("C800.ttf", 45);
-
-    texte = TTF_RenderText_Solid(police, tempsS, couleurNoire);
-    position.x = 520;
-    position.y = 800;
-    SDL_BlitSurface(texte, NULL, ecran, &position); /* Blit du texte */
-
-    texte = TTF_RenderText_Solid(police, tempsD, couleurNoire);
-    position.x = 445;
-    position.y = 800;
-    SDL_BlitSurface(texte, NULL, ecran, &position); /* Blit du texte */
-
-    sprintf(tempsM, "%d", compteurM);
-    texte = TTF_RenderText_Solid(police, tempsM, couleurNoire);
-    position.x = 430 - longueur_nombre(compteurM)*35;
-    position.y = 800;
-    SDL_BlitSurface(texte, NULL, ecran, &position); /* Blit du texte */
-
-    jeuSDL(p, ecran, image, police, texte, tempsS, tempsD, tempsM, tempsActuel,
-           tempsPrecedent, &compteurS, &compteurM);
+    jeuSDL(p, ecran, image, police, texte);
 
     SDL_FreeSurface(ecran);
     SDL_FreeSurface(image);
