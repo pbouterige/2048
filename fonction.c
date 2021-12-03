@@ -538,13 +538,20 @@ void jeuSDL(Partie* p, SDL_Surface* ecran, SDL_Surface* image, TTF_Font* police,
         SDL_Color couleurNoire = {0, 0, 0};
         SDL_Color couleurFond = {248, 239, 222};
         tempsActuel = SDL_GetTicks();
+
+        int dizaine = 0;
+
         if (tempsActuel - tempsPrecedent >= 1000) /* Si 100 ms au moins se sont écoulées */
         {
-            *compteurS += 1; /* On rajoute 100 ms au compteur */
-            if (*compteurS >= 60) {
+            *compteurS += 1; /* On rajoute 1 sec au compteur */
+            if (*compteurS >= 10) {
+                dizaine += 1;
+                *compteurS = 0;
+            }
+            if (dizaine >= 6) {
                 *compteurM += 1;
                 sprintf(tempsM, "%d", *compteurM);
-                *compteurS = 0;
+                dizaine = 0;
                 texte = TTF_RenderText_Blended(police, tempsM, couleurNoire);
                 position.x = 455 - longueur_nombre(*compteurM)*30;
                 position.y = 800;
@@ -553,22 +560,24 @@ void jeuSDL(Partie* p, SDL_Surface* ecran, SDL_Surface* image, TTF_Font* police,
             }
             sprintf(tempsS, "%d", *compteurS); /* On écrit dans la chaîne "temps" le nouveau temps */
             SDL_FreeSurface(texte); /* On supprime la surface précédente */
-            texte = TTF_RenderText_Shaded(
-                police, tempsS, couleurNoire, couleurFond); /* On écrit la chaîne temps dans la SDL_Surface */
+            texte = TTF_RenderText_Shaded(police, tempsS, couleurNoire, couleurFond); /* On écrit la chaîne temps dans la SDL_Surface */
             tempsPrecedent = tempsActuel; /* On met à jour le tempsPrecedent */
         }
 
-        image = SDL_CreateRGBSurface(SDL_HWSURFACE,200,100,32,248,239,222,255);
-        SDL_FillRect(image, NULL, SDL_MapRGB(ecran->format, 248, 239, 222));
-        position.x = 350;
-        position.y = 750;
-        SDL_BlitSurface(image,NULL,ecran,&position);
+        // image = SDL_CreateRGBSurface(SDL_HWSURFACE,200,100,32,248,239,222,255);
+        // SDL_FillRect(image, NULL, SDL_MapRGB(ecran->format, 248, 239, 222));
+        // position.x = 350;
+        // position.y = 750;
+        // SDL_BlitSurface(image,NULL,ecran,&position);
        
-        position.x = 470;
+        position.x = 480;
         position.y = 800;
         SDL_BlitSurface(texte, NULL, ecran, &position); /* Blit du texte */
 
-        
+        texte = TTF_RenderText_Blended(police, dizaine, couleurNoire);
+        position.x = 470;
+        position.y = 800;
+        SDL_BlitSurface(texte, NULL, ecran, &position); /* Blit du texte */
 
         SDL_Flip(ecran);
         }
@@ -674,7 +683,7 @@ int SDL_launch(Partie* p) {
 
     SDL_Flip(ecran);
     sleep(5);
-    //SDL_FillRect(ecran, NULL, SDL_MapRGB(248, 239, 222));
+    SDL_FillRect(ecran, NULL, SDL_MapRGB(ecran->format, 248, 239, 222));
 
     position.x = 160;
     position.y = 75;
@@ -704,7 +713,12 @@ int SDL_launch(Partie* p) {
     SDL_Color couleurNoire = {0, 0, 0};
     police = TTF_OpenFont("C800.ttf", 45);
     texte = TTF_RenderText_Solid(police, tempsS, couleurNoire);
-    position.x = 400;
+    position.x = 470;
+    position.y = 800;
+    SDL_BlitSurface(texte, NULL, ecran, &position); /* Blit du texte */
+
+    texte = TTF_RenderText_Solid(police, tempsM, couleurNoire);
+    position.x = 455 - longueur_nombre(compteurM)*30;
     position.y = 800;
     SDL_BlitSurface(texte, NULL, ecran, &position); /* Blit du texte */
 
